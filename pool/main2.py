@@ -14,17 +14,24 @@ from math import cos, sin, pi
 
 from multiprocessing import Pool
 import os
-from tqdm import tqdm
 
-num_thread = 4*4
-num_episodes = 100
+import argparse
+import pickle
 
-#region def playgame
+mydpi = 96
+
 def play_game(game_idx):
     was_closed = False
-    step = 0
-    if not os.path.isdir(str(game_idx)):
-        os.mkdir(str(game_idx))
+    global_step = 0
+    local_step = 0
+    turn = 0
+    tmp_list = [[]]
+    """fig = plt.figure(figsize=(config.resolution[1]/mydpi, config.resolution[0]/mydpi), dpi=mydpi)
+    ax = plt.Axes(fig, [0., 0., 1., 1.])"""
+
+    if not os.path.isdir('dataset/'+str(game_idx)):
+        os.mkdir('dataset/'+str(game_idx))
+        #os.mkdir('dataset/'+ str(game_idx) + '/' + str(turn))
     while not was_closed:
         game = gamestate.GameState()
         button_pressed = config.play_game_button #graphics.draw_main_menu(game)
@@ -32,26 +39,39 @@ def play_game(game_idx):
         if button_pressed == config.play_game_button:
             game.start_pool()
             events = event.events()
-            while not (events["closed"] or game.is_game_over or events["quit_to_main_menu"] or step==10):
-                print(step)
+            while not (events["closed"] or game.is_game_over or events["quit_to_main_menu"] or global_step==50000):
                 events = event.events()
                 collisions.resolve_all_collisions(game.balls, game.holes, game.table_sides)
                 game.redraw_all()
-                
-                table = np.zeros((config.resolution[0], config.resolution[1]))
+                #table = np.zeros((config.resolution[0], config.resolution[1]))
                 for i in range(len(list(game.balls))):
                     pos = list(game.balls)[i].ball.pos
-                    table[
+                    tmp_list[-1].append(pos.copy())
+                    """table[
                         [int(pos[0] + cos(i*2*pi/360)*12.5) for i in range(360)],
                         [int(pos[1] + sin(i*2*pi/360)*12.5) for i in range(360)]
-                    ] = 1
+                    ] = 1"""
 
-                plt.imshow(table, cmap='gray')
-                plt.savefig(str(game_idx) + '/'+str(step)+'.png')
-                step += 1
+                tmp_list.append([])
+                """ax.set_axis_off()
+                fig.add_axes(ax)
+                ax.imshow(table, cmap='gray')
+                plt.savefig('dataset/'+ str(game_idx) + '/' + str(turn) + '/'+str(local_step)+'.png')
+                plt.cla()
+                plt.clf()"""
+                global_step += 1
+                local_step += 1
+                
 
 
                 if game.all_not_moving():
+                    if global_step != 1:
+                        with open('dataset/'+ str(game_idx) + '/' + str(turn) + '_'+str(local_step)+'.pickle', "wb") as f:
+                            pickle.dump(tmp_list[:-1], f)
+                            tmp_list = [[]]
+                        turn += 1
+                        #os.mkdir('dataset/'+ str(game_idx) + '/' + str(turn))
+                    local_step = 0
                     game.check_pool_rules()
                     game.cue.make_visible(game.current_player)
                     while not (
@@ -59,7 +79,7 @@ def play_game(game_idx):
                         game.redraw_all()
                         events = event.events()
                         if True: #game.cue.is_clicked(events):
-                            game.cue.cue_is_active(game, events)
+                            game.cue.cue_is_active(game, events, global_step==1)
                         elif game.can_move_white_ball and game.white_ball.is_clicked(events):
                             game.white_ball.is_active(game, game.is_behind_line_break())
             was_closed = True #events["closed"]
@@ -70,15 +90,12 @@ def play_game(game_idx):
     print('closing')
     pygame.quit()
     print('done')
-#endregion
-
-def play_game2(game_idx):
-    os.system('python pool/pool/main2.py '+str(game_idx))
-
-with Pool(num_thread) as p:
-    #list(tqdm(p.map(play_game2, list(range(num_episodes)))))
-    list(tqdm(p.map(play_game2, [71])))
 
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('file_number', type=int)
+    args = parser.parse_args()
 
-print('donedone')
+    
+    play_game(args.file_number)

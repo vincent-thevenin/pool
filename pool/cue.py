@@ -8,6 +8,8 @@ import event
 import gamestate
 import physics
 
+import random
+
 
 class Cue(pygame.sprite.Sprite):
     def __init__(self, target):
@@ -67,8 +69,10 @@ class Cue(pygame.sprite.Sprite):
         return rect_area + 1 >= triangle_areas
 
     def update_cue_displacement(self, mouse_pos, initial_mouse_dist):
-        displacement = physics.point_distance(
-            mouse_pos, self.target_ball.ball.pos) - initial_mouse_dist + config.ball_radius
+        """displacement = physics.point_distance(
+            mouse_pos, self.target_ball.ball.pos) - initial_mouse_dist + config.ball_radius"""
+        displacement = random.uniform(config.ball_radius, config.cue_max_displacement)
+
         if displacement > config.cue_max_displacement:
             self.displacement = config.cue_max_displacement
         elif displacement < config.ball_radius:
@@ -99,7 +103,7 @@ class Cue(pygame.sprite.Sprite):
     def make_invisible(self):
         self.visible = False
 
-    def cue_is_active(self, game_state, events):
+    def cue_is_active(self, game_state, events, is_first_frame=False):
         initial_mouse_pos = events["mouse_pos"]
         initial_mouse_dist = physics.point_distance(
             initial_mouse_pos, self.target_ball.ball.pos)
@@ -112,16 +116,20 @@ class Cue(pygame.sprite.Sprite):
                         math.pi, config.table_color)
 
         if self.displacement > config.ball_radius+config.cue_safe_displacement:
-            self.ball_hit()
+            self.ball_hit(is_first_frame)
 
-    def ball_hit(self):
+    def ball_hit(self, is_first_frame=False):
+        if is_first_frame:
+            self.angle = (-math.pi/2) + random.uniform(-0.1, 0.1)
+        else:
+            self.angle = random.uniform(0, math.pi*2)
         new_velocity = -(self.displacement - config.ball_radius - config.cue_safe_displacement) * \
                        config.cue_hit_power * np.array([math.sin(self.angle), math.cos(self.angle)])
         change_in_disp = np.hypot(*new_velocity) * 0.1
         while self.displacement - change_in_disp > config.ball_radius:
             self.displacement -= change_in_disp
             self.update()
-            pygame.display.flip()
+            #pygame.display.flip()
         self.target_ball.ball.apply_force(new_velocity)
         self.displacement = config.ball_radius
         self.visible = False
@@ -144,4 +152,4 @@ class Cue(pygame.sprite.Sprite):
                         math.pi, config.table_color)
         self.draw_lines(game_state, self.target_ball, self.angle +
                         math.pi, (255, 255, 255))
-        pygame.display.flip()
+        #pygame.display.flip()

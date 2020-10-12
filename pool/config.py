@@ -3,6 +3,7 @@ import math
 import numpy as np
 import pygame
 
+rescale_factor = 5
 
 # fonts need to be initialised before using
 def get_default_font(size):
@@ -21,16 +22,16 @@ def set_max_resolution():
 fullscreen = False
 # fullscreen resolution can only be known after initialising the screen
 if not fullscreen:
-    resolution = np.array([1000, 500])
+    resolution = np.array([int(187*rescale_factor), int(95*rescale_factor)])
 window_caption = "Pool"
 fps_limit = 60
 
 # table settings
-table_margin = 40
+table_margin = int(4.5*rescale_factor)
 table_side_color = (200, 200, 0)
 table_color = (0, 100, 0)
 separation_line_color = (200, 200, 200)
-hole_radius = 22
+hole_radius = int(8.5*rescale_factor/2)
 middle_hole_offset = np.array([[-hole_radius * 2, hole_radius], [-hole_radius, 0],
                                [hole_radius, 0], [hole_radius * 2, hole_radius]])
 side_hole_offset = np.array([
@@ -56,7 +57,7 @@ aiming_line_length = 14
 
 # ball settings
 total_ball_num = 16
-ball_radius = 14
+ball_radius = int(5.25*rescale_factor/2) #14
 ball_mass = 14
 speed_angle_threshold = 0.09
 visible_angle_threshold = 0.05

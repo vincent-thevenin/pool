@@ -1,5 +1,6 @@
 import numpy as np
 import pygame
+import random
 
 
 class GameEvent():
@@ -25,5 +26,6 @@ def events():
 
     return {"quit_to_main_menu": quit,
             "closed": closed,
-            "clicked": pygame.mouse.get_pressed()[0],
-            "mouse_pos": np.array(pygame.mouse.get_pos())}
+            "clicked": random.random()<0.5,#pygame.mouse.get_pressed()[0],
+            "mouse_pos": np.zeros(2) #np.random.randint(100, 500, (2)) #np.array(pygame.mouse.get_pos())
+            }

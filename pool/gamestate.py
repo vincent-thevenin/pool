@@ -110,11 +110,12 @@ class GameState:
         return self.turn_number == 0
 
     def redraw_all(self, update=True):
-        self.all_sprites.clear(self.canvas.surface, self.canvas.background)
-        self.all_sprites.draw(self.canvas.surface)
+        #self.all_sprites.clear(self.canvas.surface, self.canvas.background)
+        #self.all_sprites.draw(self.canvas.surface)
         self.all_sprites.update(self)
-        if update:
+        """if update:
             pygame.display.flip()
+        """
         self.mark_one_frame()
 
     def all_not_moving(self):
@@ -189,9 +190,9 @@ class GameState:
             text = "PLAYER 2 WON!"
         rendered_text = font.render(text, False, (255, 255, 255))
         self.canvas.surface.blit(rendered_text, (config.resolution - font.size(text)) / 2)
-        pygame.display.flip()
+        #pygame.display.flip()
         pygame.event.clear()
-        paused = True
+        paused = False
         while paused:
             event = pygame.event.wait()
             if event.type == pygame.QUIT or event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
@@ -216,11 +217,11 @@ class GameState:
             self.cue.target_ball = self.white_ball
             self.potted.remove(0)
             self.turn_over(True)
-        if 8 in self.potted:
+        """if 8 in self.potted:
             if self.potting_8ball[self.current_player]:
                 self.game_over(self.current_player == Player.Player1)
             else:
-                self.game_over(self.current_player != Player.Player1)
+                self.game_over(self.current_player != Player.Player1)"""
 
     def check_remaining(self):
         # a check if all striped or solid balls were potted
